@@ -12,6 +12,25 @@ func checkError(err error) {
 	}
 }
 
+func GetFileName(year int, day int, real bool) string {
+	var fileName string
+
+	if real {
+		fileName = "data"
+	} else {
+		fileName = "test.data"
+	}
+
+	var dayString string
+	if day < 10 {
+		dayString = "0" + strconv.Itoa(day)
+	} else {
+		dayString = strconv.Itoa(day)
+	}
+
+	return strconv.Itoa(year) + "/day-" + dayString + "/" + fileName
+}
+
 func ReadFileAsStringArray(filename string) []string {
 	file, err := os.Open(filename)
 	checkError(err)
