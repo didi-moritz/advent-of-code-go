@@ -5,34 +5,8 @@ import (
 	"fmt"
 )
 
-func foo(defaultPart int, defaultRealData bool) (int, bool) {
-	var part int
-	fmt.Print("Part 1 or 2: ")
-	_, err := fmt.Scan(&part)
-	if err != nil {
-		panic(err)
-	}
-
-	var realDataString string
-	fmt.Print("Real data: ")
-	_, err = fmt.Scan(&realDataString)
-	if err != nil {
-		panic(err)
-	}
-
-	var realData bool
-
-	if realDataString == "" {
-		realData = defaultRealData
-	} else {
-		realData = realDataString == "1" || realDataString == "true" || realDataString == "yes" || realDataString == "y"
-	}
-
-	return part, realData
-}
-
 func main() {
-	part, realData := foo(1, true)
+	part, realData := utils.GetRunConfig(1, true)
 
 	data := utils.ReadFileAsStringArray(utils.GetFileName(2020, 2, realData))
 

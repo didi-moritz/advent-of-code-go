@@ -2,6 +2,8 @@ package utils
 
 import (
 	"bufio"
+	"flag"
+	"fmt"
 	"os"
 	"strconv"
 )
@@ -10,6 +12,17 @@ func checkError(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func GetRunConfig(defaultPart int, defaultRealData bool) (int, bool) {
+	partPtr := flag.Int("p", defaultPart, "Part of the day to run")
+	realDataPtr := flag.Bool("r", defaultRealData, "Use real data")
+
+	flag.Parse()
+
+	fmt.Println("Running Part:", *partPtr, " Real Data:", *realDataPtr)
+
+	return *partPtr, *realDataPtr
 }
 
 func GetFileName(year int, day int, real bool) string {
