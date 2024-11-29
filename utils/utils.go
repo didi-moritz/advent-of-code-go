@@ -16,13 +16,21 @@ func checkError(err error) {
 
 func GetRunConfig(defaultPart int, defaultRealData bool) (int, bool) {
 	partPtr := flag.Int("p", defaultPart, "Part of the day to run")
-	realDataPtr := flag.Bool("r", defaultRealData, "Use real data")
+	realDataPtr := flag.Bool("r", false, "Use real data")
+	testDataPtr := flag.Bool("t", false, "Use test data")
 
 	flag.Parse()
 
-	fmt.Println("Running Part:", *partPtr, " Real Data:", *realDataPtr)
+	var realData bool
+	if *realDataPtr == *testDataPtr {
+		realData = defaultRealData
+	} else {
+		realData = *realDataPtr
+	}
 
-	return *partPtr, *realDataPtr
+	fmt.Println("Running Part:", *partPtr, " Real Data:", realData)
+
+	return *partPtr, realData
 }
 
 func GetFileName(year int, day int, real bool) string {
@@ -42,6 +50,34 @@ func GetFileName(year int, day int, real bool) string {
 	}
 
 	return strconv.Itoa(year) + "/day-" + dayString + "/" + fileName
+}
+
+func ReadFileAsByteArray(filename string) [][]byte {
+	file, err := os.Open(filename)
+	checkError(err)
+
+	defer func(file *os.File) {
+		err := file.Close()
+		checkError(err)
+	}(file)
+
+	reader := bufio.NewReader(file)
+
+	var data [][]byte
+
+	for {
+		line, _, err := reader.ReadLine()
+		if err != nil {
+			break
+		}
+		if len(line) > 0 {
+			lineCopy := make([]byte, len(line))
+			copy(lineCopy, line)
+			data = append(data, lineCopy)
+		}
+	}
+
+	return data
 }
 
 func ReadFileAsStringArray(filename string) []string {
