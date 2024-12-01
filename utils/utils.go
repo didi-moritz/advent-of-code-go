@@ -16,21 +16,21 @@ func checkError(err error) {
 
 func GetRunConfig(defaultPart int, defaultRealData bool) (int, bool) {
 	partPtr := flag.Int("p", defaultPart, "Part of the day to run")
-	realDataPtr := flag.Bool("r", false, "Use real data")
-	testDataPtr := flag.Bool("t", false, "Use test data")
+	useRealDataPtr := flag.Bool("r", false, "Use real data")
+	useTestDataPtr := flag.Bool("t", false, "Use test data")
 
 	flag.Parse()
 
-	var realData bool
-	if *realDataPtr == *testDataPtr {
-		realData = defaultRealData
+	var useRealData bool
+	if *useRealDataPtr == *useTestDataPtr {
+		useRealData = defaultRealData
 	} else {
-		realData = *realDataPtr
+		useRealData = *useRealDataPtr
 	}
 
-	fmt.Println("Running Part:", *partPtr, " Real Data:", realData)
+	fmt.Println("Running Part:", *partPtr, " Real Data:", useRealData)
 
-	return *partPtr, realData
+	return *partPtr, useRealData
 }
 
 func GetFileName(year int, day int, real bool) string {
@@ -70,11 +70,9 @@ func ReadFileAsByteArray(filename string) [][]byte {
 		if err != nil {
 			break
 		}
-		if len(line) > 0 {
-			lineCopy := make([]byte, len(line))
-			copy(lineCopy, line)
-			data = append(data, lineCopy)
-		}
+		lineCopy := make([]byte, len(line))
+		copy(lineCopy, line)
+		data = append(data, lineCopy)
 	}
 
 	return data
@@ -95,9 +93,7 @@ func ReadFileAsStringArray(filename string) []string {
 
 	for {
 		line, _, err := reader.ReadLine()
-		if len(line) > 0 {
-			data = append(data, string(line))
-		}
+		data = append(data, string(line))
 		if err != nil {
 			break
 		}

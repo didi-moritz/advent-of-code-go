@@ -26,3 +26,5 @@ go.work.sum
 
 .idea
 *.iml
+
+2020/main.go
