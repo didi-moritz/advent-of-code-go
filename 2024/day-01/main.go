@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, true)
+	part, realData := utils.GetRunConfig(2, true)
 
 	data := utils.ReadFileAsStringArray(utils.GetFileName(2024, 1, realData))
 
@@ -51,5 +51,24 @@ func part1(data []string) int {
 }
 
 func part2(data []string) int {
-	return 0
+	var lefts []int
+	rights := make(map[int]int)
+	for _, line := range data {
+		var left, right int
+		fmt.Sscanf(line, "%d  %d", &left, &right)
+		lefts = append(lefts, left)
+
+		rights[right] = rights[right] + 1
+
+	}
+
+	result := 0
+
+	for _, left := range lefts {
+		if rights[left] > 0 {
+			result += left * rights[left]
+		}
+	}
+
+	return result
 }
