@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, true)
+	part, realData := utils.GetRunConfig(2, true)
 
 	data := utils.ReadFileAsByteArray(utils.GetFileName(2024, 4, realData))
 
@@ -83,6 +83,60 @@ func part1(data [][]byte) int {
 }
 
 func part2(data [][]byte) int {
+	found := make([][]bool, len(data))
+	for i := range data {
+		found[i] = make([]bool, len(data[i]))
+
+	}
+
+	height := len(data)
+	width := len(data[0])
+
+	result := 0
+
+	xms := [][]vector{{{1, 1}, {-1, -1}}, {{1, -1}, {-1, 1}}}
+
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			if data[y][x] == 'A' {
+				match := true
+				for _, xm := range xms {
+					ca := get_valid_char(data, x+xm[0].x, y+xm[0].y)
+					cb := get_valid_char(data, x+xm[1].x, y+xm[1].y)
+
+					if ca == 0 || cb == 0 || ca == cb {
+						match = false
+						break
+					}
+				}
+
+				if match {
+					result++
+					found[y][x] = true
+					for _, xm := range xms {
+						for _, m := range xm {
+							found[y+m.y][x+m.x] = true
+						}
+					}
+				}
+			}
+		}
+	}
+
+	print_data(data, found)
+
+	return result
+}
+
+func get_valid_char(data [][]byte, x, y int) byte {
+	if x < 0 || x >= len(data[0]) || y < 0 || y >= len(data) {
+		return 0
+	}
+
+	if data[y][x] == 'M' || data[y][x] == 'S' {
+		return data[y][x]
+	}
+
 	return 0
 }
 
