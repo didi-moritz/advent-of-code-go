@@ -93,10 +93,10 @@ func ReadFileAsStringArray(filename string) []string {
 
 	for {
 		line, _, err := reader.ReadLine()
-		data = append(data, string(line))
 		if err != nil {
 			break
 		}
+		data = append(data, string(line))
 	}
 
 	return data
