@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 )
 
 func checkError(err error) {
@@ -105,4 +106,9 @@ func ReadFileAsStringArray(filename string) []string {
 func ParseInt(s string) int64 {
 	value, _ := strconv.ParseInt(s, 10, 64)
 	return value
+}
+
+func TimeTrack(start time.Time) {
+	elapsed := time.Since(start)
+	fmt.Println("It took", elapsed)
 }

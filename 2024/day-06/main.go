@@ -4,6 +4,7 @@ import (
 	"advent-of-code-go/utils"
 	"fmt"
 	"slices"
+	"time"
 )
 
 type v struct {
@@ -72,22 +73,28 @@ func move(obstacles []v, pos v, dir int, width int, height int) []v {
 }
 
 func part2(obstacles []v, start v, width int, height int) int {
+	defer utils.TimeTrack(time.Now())
+
 	result := 0
+
+	os := make([][]bool, width)
+	for x := range width {
+		os[x] = make([]bool, height)
+		for y := range height {
+			os[x][y] = slices.Contains(obstacles, v{x, y})
+		}
+	}
 
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			no := v{x, y}
-			if no == start || slices.Contains(obstacles, no) {
+			if no == start || os[x][y] {
 				continue
 			}
 
-			newObstacles := make([]v, len(obstacles)+1)
-			copy(newObstacles, obstacles)
-			newObstacles[len(obstacles)] = no
-
 			fmt.Println("checking", no)
 
-			if isALoop(newObstacles, start, 0, width, height) {
+			if isALoop(os, no, start, 0, width, height) {
 				result++
 			}
 		}
@@ -96,7 +103,7 @@ func part2(obstacles []v, start v, width int, height int) int {
 	return result
 }
 
-func isALoop(obstacles []v, pos v, dir int, width int, height int) bool {
+func isALoop(obstacles [][]bool, no v, pos v, dir int, width int, height int) bool {
 	moves := []v{{0, -1}, {1, 0}, {0, 1}, {-1, 0}}
 
 	visits := make([][]int, width)
@@ -105,9 +112,12 @@ func isALoop(obstacles []v, pos v, dir int, width int, height int) bool {
 		visits[x] = make([]int, height)
 	}
 
+	px := pos.x
+	py := pos.y
+
 	for {
-		nx := pos.x + moves[dir].x
-		ny := pos.y + moves[dir].y
+		nx := px + moves[dir].x
+		ny := py + moves[dir].y
 
 		if nx < 0 || nx >= width || ny < 0 || ny >= height {
 			return false
@@ -117,13 +127,13 @@ func isALoop(obstacles []v, pos v, dir int, width int, height int) bool {
 			return true
 		}
 
-		np := v{nx, ny}
-		if slices.Contains(obstacles, np) {
+		if obstacles[nx][ny] || nx == no.x && ny == no.y {
 			dir++
 			dir %= len(moves)
 		} else {
 			visits[nx][ny] = dir + 1
-			pos = np
+			px = nx
+			py = ny
 		}
 	}
 }
