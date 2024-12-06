@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsByteArray(utils.GetFileName(2020, 5, realData))
 
@@ -54,5 +54,43 @@ func part1(data [][]byte) int {
 }
 
 func part2(data [][]byte) int {
+	found := make([]bool, 128*8)
+	for _, line := range data {
+		row := make([]byte, 7)
+		col := make([]byte, 3)
+		for i, c := range line {
+			if i < 7 {
+				if c == 'B' {
+					row[i] = '1'
+				} else {
+					row[i] = '0'
+				}
+			} else {
+				if c == 'R' {
+					col[i-7] = '1'
+				} else {
+					col[i-7] = '0'
+				}
+			}
+		}
+		rowN, _ := strconv.ParseInt(string(row), 2, 8)
+		colN, _ := strconv.ParseInt(string(col), 2, 8)
+		sum := int(rowN)*8 + int(colN)
+
+		found[sum] = true
+	}
+
+	alreadySkipped := false
+	for i := range found {
+		if !found[i] && alreadySkipped {
+			return i
+		}
+
+		if found[i] && !alreadySkipped {
+			alreadySkipped = true
+		}
+
+	}
+
 	return 0
 }
