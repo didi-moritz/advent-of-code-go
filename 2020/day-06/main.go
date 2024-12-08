@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsByteArray(utils.GetFileName(2020, 6, realData))
 
@@ -25,7 +25,7 @@ func main() {
 	if part == 1 {
 		result = part1(blocks)
 	} else {
-		result = part2(data)
+		result = part2(blocks)
 	}
 
 	fmt.Println(result)
@@ -49,6 +49,26 @@ func part1(blocks [][][]byte) int {
 	return result
 }
 
-func part2(data [][]byte) int {
-	return 0
+func part2(blocks [][][]byte) int {
+	result := 0
+	for _, block := range blocks {
+		var found []byte
+
+		for _, c := range block[0] {
+			found = append(found, c)
+		}
+
+		for _, line := range block[1:] {
+			for i := len(found) - 1; i >= 0; i-- {
+				c := found[i]
+				if !slices.Contains(line, c) {
+					found = append(found[:i], found[i+1:]...)
+				}
+			}
+		}
+
+		result += len(found)
+	}
+
+	return result
 }
