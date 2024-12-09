@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsStringArray(utils.GetFileName(2020, 7, realData))
 
@@ -62,6 +62,46 @@ func find(color string, found []string, colorContains map[string][]string) []str
 	return found
 }
 
+type bags struct {
+	name  string
+	count int
+}
+
 func part2(data []string) int {
-	return 0
+	r1 := regexp.MustCompile("^(.*) bags contain (.*)\\.$")
+	r2 := regexp.MustCompile("(\\d+) ([^,]+) bags?")
+
+	colorContains := make(map[string][]bags)
+
+	for _, line := range data {
+		find := r1.FindStringSubmatch(line)
+		firstColor := find[1]
+
+		find2 := r2.FindAllStringSubmatch(find[2], -1)
+		if len(find2) > 0 {
+			for _, f2 := range find2 {
+				secondColorCount := int(utils.ParseInt(f2[1]))
+				secondColorName := f2[2]
+				colorContains[firstColor] = append(colorContains[firstColor], bags{secondColorName, secondColorCount})
+			}
+		}
+	}
+
+	result := calc("shiny gold", colorContains)
+
+	return result
+}
+
+func calc(color string, colorContains map[string][]bags) int {
+	containingBags := colorContains[color]
+	if len(containingBags) == 0 {
+		return 0
+	}
+
+	sum := 0
+	for _, bag := range containingBags {
+		sum += bag.count * (calc(bag.name, colorContains) + 1)
+	}
+
+	return sum
 }
