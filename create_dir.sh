@@ -10,6 +10,6 @@ dir="$year/day-$paddedDay"
 
 mkdir -p $dir
 
-cp -n 2020/template.go $dir/main.go
+cp -n template.go $dir/main.go
 touch $dir/data
 touch $dir/test.data
