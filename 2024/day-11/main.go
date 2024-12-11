@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsStringArray(utils.GetFileName(2024, 11, realData))
 
@@ -22,7 +22,7 @@ func main() {
 	if part == 1 {
 		result = part1(numbers)
 	} else {
-		result = part2(data)
+		result = part2(numbers)
 	}
 
 	fmt.Println(result)
@@ -56,6 +56,50 @@ func calcNumber(n int, step int) int {
 	return calcNumber(n*2024, step+1)
 }
 
-func part2(data []string) int {
-	return 0
+func part2(numbers []int) int {
+
+	cache := make(map[int]map[int]int)
+	result := 0
+	for _, n := range numbers {
+		result += calcNumber2(n, 0, cache)
+	}
+
+	return result
+}
+
+func calcNumber2(n int, step int, cache map[int]map[int]int) int {
+	if step == 75 {
+		return 1
+	}
+
+	if cache[n] != nil {
+		if cache[n][step] > 0 {
+			return cache[n][step]
+		}
+	}
+
+	if n == 0 {
+		result := calcNumber2(1, step+1, cache)
+		initCacheForNumber(cache, n)
+		cache[n][step] = result
+		return result
+	}
+
+	nString := strconv.Itoa(n)
+
+	if len(nString)%2 == 0 {
+		result := calcNumber2(int(utils.ParseInt(nString[:len(nString)/2])), step+1, cache) +
+			calcNumber2(int(utils.ParseInt(nString[len(nString)/2:])), step+1, cache)
+		initCacheForNumber(cache, n)
+		cache[n][step] = result
+		return result
+	}
+
+	return calcNumber2(n*2024, step+1, cache)
+}
+
+func initCacheForNumber(cache map[int]map[int]int, n int) {
+	if cache[n] == nil {
+		cache[n] = make(map[int]int)
+	}
 }
