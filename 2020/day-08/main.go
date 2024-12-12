@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsStringArray(utils.GetFileName(2020, 8, realData))
 
@@ -72,10 +72,81 @@ func part1(data []string) int {
 			i++
 		}
 	}
+}
+
+func part2(data []string) int {
+	is := make([]Instruction, len(data))
+
+	for i, line := range data {
+		parts := strings.Split(line, " ")
+		command := commandMap[parts[0]]
+		value := int(utils.ParseInt(parts[1]))
+		is[i] = Instruction{command, value}
+	}
+
+	for i, instruction := range is {
+		if instruction.command == ACC {
+			continue
+		}
+
+		if instruction.command == NOP && (instruction.value == 0 || instruction.value == 1) {
+			continue
+		}
+
+		if instruction.command == JMP && instruction.value == 1 {
+			continue
+		}
+
+		newIs := make([]Instruction, len(is))
+		copy(newIs, is)
+
+		var newCommand CommandType
+		if instruction.command == NOP {
+			newCommand = JMP
+		} else {
+			newCommand = NOP
+		}
+
+		newIs[i].command = newCommand
+
+		success, value := checkInstructions(newIs)
+		if success {
+			return value
+		}
+	}
 
 	return 0
 }
 
-func part2(data []string) int {
-	return 0
+func checkInstructions(is []Instruction) (bool, int) {
+	visited := make([]bool, len(is))
+
+	accValue := 0
+	i := 0
+
+	for {
+		if i == len(is) {
+			return true, accValue
+		}
+
+		if i > len(is) {
+			return false, 0
+		}
+
+		if visited[i] == true {
+			return false, 0
+		}
+
+		visited[i] = true
+
+		if is[i].command == JMP {
+			i += is[i].value
+		} else {
+			if is[i].command == ACC {
+				accValue += is[i].value
+			}
+
+			i++
+		}
+	}
 }
