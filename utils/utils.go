@@ -112,3 +112,23 @@ func TimeTrack(start time.Time) {
 	elapsed := time.Since(start)
 	fmt.Println("It took", elapsed)
 }
+
+func PrintBitAsBrailleChar(bits []bool) {
+	fmt.Print(BitToBrailleChar(bits))
+}
+
+func BitToBrailleChar(bits []bool) string {
+	//indexes := []int{0, 2, 4, 1, 3, 5, 6, 7}
+	indexes := []int{7, 6, 5, 3, 1, 4, 2, 0}
+	a := 0
+	for _, i := range indexes {
+		a = a << 1
+		if bits[i] {
+			a++
+		}
+	}
+
+	a += 10240
+
+	return string(rune(a))
+}

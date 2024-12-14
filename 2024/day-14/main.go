@@ -95,11 +95,7 @@ func part2(robots []robot, width int, height int) int {
 		m[y] = make([]bool, width)
 	}
 
-	for number := 0; number < 1000000000000; number++ {
-		if number%100000 == 0 {
-			fmt.Println(number)
-		}
-
+	for number := 0; number <= 100000; number++ {
 		for iy := range height {
 			for ix := range width {
 				m[iy][ix] = false
@@ -143,7 +139,6 @@ func part2(robots []robot, width int, height int) int {
 		}
 
 		if show {
-			fmt.Print("\033[H\033[2J")
 			for iy := 0; iy < height; iy += 2 {
 				for ix := 0; ix < width; ix += 2 {
 					c1 := m[iy][ix]
@@ -187,6 +182,22 @@ func part2(robots []robot, width int, height int) int {
 						fmt.Println(c1, c2, c3, c4)
 						return 666
 					}
+				}
+				fmt.Println()
+			}
+
+			for iy := 0; iy < height; iy += 4 {
+				for ix := 0; ix < width; ix += 2 {
+
+					var bits []bool
+					for iiy := iy; iiy < iy+4; iiy++ {
+						for iix := ix; iix < ix+2; iix++ {
+							c := iix < width && iiy < height && m[iiy][iix]
+							bits = append(bits, c)
+						}
+					}
+
+					utils.PrintBitAsBrailleChar(bits)
 				}
 				fmt.Println()
 			}
