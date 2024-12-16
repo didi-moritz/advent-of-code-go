@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsByteArray(utils.GetFileName(2023, 17, realData))
 
@@ -24,7 +24,7 @@ func main() {
 	if part == 1 {
 		result = part1(numbers)
 	} else {
-		result = part2(data)
+		result = part2(numbers)
 	}
 
 	fmt.Println(result)
@@ -134,20 +134,123 @@ func move(x int, y int, dir int, steps int, heat int, numbers [][]int, visited [
 	return minimum
 }
 
-func printMap(data [][]int, visited []v) {
-	for y, line := range data {
-		for x, c := range line {
+func printMap(numbers [][]int, visited []v) {
+	colorRed := "\033[0;31m"
+	colorNone := "\033[0m"
+	for y := range numbers[0] {
+		for x := range numbers {
 			p := v{x, y}
 			if slices.Contains(visited, p) {
-				fmt.Print(" ")
+				fmt.Print(colorRed)
+				fmt.Print(numbers[x][y])
+				fmt.Print(colorNone)
 			} else {
-				fmt.Print(c)
+				fmt.Print(numbers[x][y])
 			}
 		}
 		fmt.Println()
 	}
 }
 
-func part2(data [][]byte) int {
-	return 0
+func part2(numbers [][]int) int {
+	cache = make([][]map[cacheKey]int, len(numbers))
+	for x := range len(numbers) {
+		cache[x] = make([]map[cacheKey]int, len(numbers[0]))
+		for y := range len(numbers[0]) {
+			cache[x][y] = make(map[cacheKey]int)
+		}
+	}
+
+	minHeat := math.MaxInt
+	move2(0, 0, -1, 0, 0, numbers, make([]v, 0), &minHeat)
+	return minHeat
+}
+
+func move2(x int, y int, dir int, steps int, heat int, numbers [][]int, visited []v, minHeat *int) int {
+	width := len(numbers)
+	height := len(numbers[0])
+	if x < 0 || x >= width || y < 0 || y >= height {
+		return -1
+	}
+
+	if dir >= 0 {
+		heat += numbers[x][y]
+	}
+
+	if heat > *minHeat {
+		return -1
+	}
+
+	if x == width-1 && y == height-1 {
+		if steps < 4 {
+			return -1
+		}
+
+		if heat < *minHeat {
+			*minHeat = heat
+			printMap(numbers, visited)
+			fmt.Println(heat)
+		}
+		return heat
+	}
+
+	p := v{x, y}
+
+	if slices.Contains(visited, p) {
+		return -1
+	}
+
+	newVisited := make([]v, len(visited))
+	copy(newVisited, visited)
+	visited = append(newVisited, p)
+
+	k := cacheKey{dir, steps}
+	{
+		val, ok := cache[x][y][k]
+		if ok {
+			if heat >= val {
+				return -1
+			}
+		}
+
+		cache[x][y][k] = heat
+	}
+
+	minimum := math.MaxInt
+	for i, m := range moves {
+		if dir > -1 && i+2%4 == dir {
+			continue
+		}
+
+		newSteps := 1
+
+		if dir < 0 {
+			newSteps = 0
+		}
+
+		if dir >= 0 && i != dir && steps < 4 {
+			continue
+		}
+
+		if i == dir {
+			newSteps = steps + 1
+			if newSteps > 10 {
+				continue
+			}
+		}
+
+		fullHeat := move2(x+m.x, y+m.y, i, newSteps, heat, numbers, visited, minHeat)
+		if fullHeat > -1 && fullHeat < minimum {
+			minimum = fullHeat
+		}
+
+		val, ok := cache[x][y][k]
+		if ok {
+			if heat > val {
+				return -1
+			}
+		}
+	}
+
+	return minimum
 }
