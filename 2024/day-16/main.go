@@ -61,10 +61,8 @@ func move(data [][]byte, end v, x int, y int, dir int, score int, found [][]int)
 		return minimum
 	}
 
-	if found[y][x] > 0 {
-		if score > found[y][x] {
-			return minimum
-		}
+	if score > found[y][x] {
+		return minimum
 	}
 
 	if p == end {
@@ -132,10 +130,8 @@ func move2(data [][]byte, end v, x int, y int, dir int, score int, found [][][]i
 		return minimum, nil
 	}
 
-	if found[y][x][dir] > 0 {
-		if score > found[y][x][dir] {
-			return minimum, visited
-		}
+	if score > found[y][x][dir] {
+		return minimum, visited
 	}
 
 	if p == end {
