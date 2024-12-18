@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"slices"
+	"strconv"
 )
 
 type v struct {
@@ -12,7 +13,7 @@ type v struct {
 }
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsStringArray(utils.GetFileName(2024, 18, realData))
 
@@ -24,11 +25,11 @@ func main() {
 		bs[i] = v{x, y}
 	}
 
-	var result int
+	var result string
 	if part == 1 {
 		result = part1(bs, realData)
 	} else {
-		result = part2(data)
+		result = part2(bs, realData)
 	}
 
 	fmt.Println(result)
@@ -38,7 +39,7 @@ var (
 	moves = []v{{1, 0}, {0, 1}, {-1, 0}, {0, -1}}
 )
 
-func part1(bs []v, realData bool) int {
+func part1(bs []v, realData bool) string {
 	width := 71
 	height := 71
 	if !realData {
@@ -74,15 +75,15 @@ func part1(bs []v, realData bool) int {
 	}
 
 	for len(unvisited) > 0 {
-		unvisited = calcDijkstra(unvisited, scores)
+		_, unvisited = calcDijkstra(unvisited, scores, v{width - 1, height - 1})
 	}
 
-	return scores[v{width - 1, height - 1}]
+	return strconv.Itoa(scores[v{width - 1, height - 1}])
 }
 
-func calcDijkstra(unvisited []v, scores map[v]int) []v {
+func calcDijkstra(unvisited []v, scores map[v]int, end v) (bool, []v) {
 	// find next candidate
-	i := 0
+	i := -1
 	score := math.MaxInt
 	for j, u := range unvisited {
 		checkScore := scores[u]
@@ -90,6 +91,10 @@ func calcDijkstra(unvisited []v, scores map[v]int) []v {
 			i = j
 			score = checkScore
 		}
+	}
+
+	if i == -1 {
+		return true, nil
 	}
 
 	p := unvisited[i]
@@ -104,9 +109,63 @@ func calcDijkstra(unvisited []v, scores map[v]int) []v {
 		}
 	}
 
-	return append(unvisited[:i], unvisited[i+1:]...)
+	if p == end {
+		return true, nil
+	}
+
+	return false, append(unvisited[:i], unvisited[i+1:]...)
 }
 
-func part2(data []string) int {
-	return 0
+func part2(bs []v, realData bool) string {
+	width := 71
+	height := 71
+	if !realData {
+		width = 7
+		height = 7
+	}
+
+	bytesToConsiderCount := 0
+	if realData {
+		bytesToConsiderCount = 1024
+	}
+
+	for {
+		bytesToConsiderCount++
+		fmt.Println(bytesToConsiderCount)
+		bytesToConsider := bs[0:bytesToConsiderCount]
+
+		unvisited := make([]v, 0)
+		scores := make(map[v]int)
+		for x := range width {
+			for y := range height {
+				p := v{x, y}
+
+				if slices.Contains(bytesToConsider, p) {
+					continue
+				}
+
+				unvisited = append(unvisited, p)
+
+				if x == 0 && y == 0 {
+					scores[p] = 0
+				} else {
+					scores[p] = math.MaxInt
+				}
+			}
+		}
+
+		for {
+			done, newUnvisited := calcDijkstra(unvisited, scores, v{width - 1, height - 1})
+			unvisited = newUnvisited
+			if done {
+				break
+			}
+		}
+
+		if scores[v{width - 1, height - 1}] == math.MaxInt {
+			errorP := bs[bytesToConsiderCount-1]
+			return strconv.Itoa(errorP.x) + "," + strconv.Itoa(errorP.y)
+		}
+	}
+	return "error"
 }
