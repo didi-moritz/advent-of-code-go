@@ -28,7 +28,7 @@ func part1(data []string) int {
 
 	result := 0
 	for i, towel := range towels {
-		check := checkTower(towel, patterns)
+		check := checkTowel(towel, patterns)
 		if check {
 			result++
 		}
@@ -38,7 +38,7 @@ func part1(data []string) int {
 	return result
 }
 
-func checkTower(towelPart string, patterns []string) bool {
+func checkTowel(towelPart string, patterns []string) bool {
 	for _, pattern := range patterns {
 		if !strings.HasPrefix(towelPart, pattern) {
 			continue
@@ -48,7 +48,7 @@ func checkTower(towelPart string, patterns []string) bool {
 			return true
 		}
 
-		if checkTower(towelPart[len(pattern):], patterns) {
+		if checkTowel(towelPart[len(pattern):], patterns) {
 			return true
 		}
 	}
