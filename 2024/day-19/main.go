@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsStringArray(utils.GetFileName(2024, 19, realData))
 
@@ -57,5 +57,44 @@ func checkTower(towelPart string, patterns []string) bool {
 }
 
 func part2(data []string) int {
-	return 0
+	patterns := strings.Split(data[0], ", ")
+
+	towels := data[2:]
+
+	cache := make(map[string]int)
+
+	result := 0
+	for i, towel := range towels {
+		value := calcTowel(towel, patterns, cache)
+		result += value
+		fmt.Println(i, value)
+	}
+
+	return result
+}
+
+func calcTowel(towelPart string, patterns []string, cache map[string]int) int {
+	cachedResult, found := cache[towelPart]
+
+	if found {
+		return cachedResult
+	}
+
+	result := 0
+	for _, pattern := range patterns {
+		if !strings.HasPrefix(towelPart, pattern) {
+			continue
+		}
+
+		if len(pattern) == len(towelPart) {
+			result++
+			continue
+		}
+
+		result += calcTowel(towelPart[len(pattern):], patterns, cache)
+	}
+
+	cache[towelPart] = result
+
+	return result
 }
