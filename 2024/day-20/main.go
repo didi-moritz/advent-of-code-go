@@ -11,12 +11,6 @@ type v struct {
 	x, y int
 }
 
-type cacheValue struct {
-	unvisited []v
-	scores    map[v]int
-	score     int
-}
-
 func main() {
 	part, realData := utils.GetRunConfig(1, false)
 
@@ -54,7 +48,7 @@ func main() {
 
 	var result int
 	if part == 1 {
-		result = part1(unvisited, bricks, start, end, width, height, realData)
+		result = part1(unvisited, bricks, start, end, realData)
 	} else {
 		result = part2()
 	}
@@ -66,13 +60,9 @@ var (
 	moves = []v{{1, 0}, {0, 1}, {-1, 0}, {0, -1}}
 )
 
-func part1(way []v, bricks []v, start v, end v, width int, height int, realData bool) int {
+func part1(way []v, bricks []v, start v, end v, realData bool) int {
 
-	baseScore, cache := calcInit(way, start, end)
-
-	fmt.Println(baseScore)
-
-	scores := cache[len(cache)-1].scores
+	scores := calcInit(way, start, end)
 
 	steps := make([]v, len(scores))
 	for i := range len(scores) {
@@ -97,9 +87,7 @@ func part1(way []v, bricks []v, start v, end v, width int, height int, realData 
 	return result
 }
 
-func calcInit(way []v, start v, end v) (int, []cacheValue) {
-	var cache []cacheValue
-
+func calcInit(way []v, start v, end v) map[v]int {
 	unvisited := make([]v, len(way))
 	copy(unvisited, way)
 
@@ -111,10 +99,10 @@ func calcInit(way []v, start v, end v) (int, []cacheValue) {
 
 	finished := false
 	for !finished {
-		finished, unvisited, cache = calcDijkstra(unvisited, scores, end, math.MaxInt, true, cache)
+		finished, unvisited = calcDijkstra(unvisited, scores, end, math.MaxInt, true)
 	}
 
-	return scores[end], cache
+	return scores
 }
 
 func calcWithCheat(step int, diff int, scores map[v]int, steps []v, bricks []v) int {
@@ -145,7 +133,7 @@ func calcWithCheat(step int, diff int, scores map[v]int, steps []v, bricks []v) 
 	return result
 }
 
-func calcDijkstra(unvisited []v, scores map[v]int, end v, maxScore int, init bool, cache []cacheValue) (bool, []v, []cacheValue) {
+func calcDijkstra(unvisited []v, scores map[v]int, end v, maxScore int, init bool) (bool, []v) {
 	// find next candidate
 	i := -1
 	score := math.MaxInt
@@ -158,7 +146,7 @@ func calcDijkstra(unvisited []v, scores map[v]int, end v, maxScore int, init boo
 	}
 
 	if i == -1 {
-		return true, nil, cache
+		return true, nil
 	}
 
 	p := unvisited[i]
@@ -176,28 +164,15 @@ func calcDijkstra(unvisited []v, scores map[v]int, end v, maxScore int, init boo
 
 	if !init {
 		if p == end {
-			return true, nil, cache
+			return true, nil
 		}
 	}
 
 	if score > maxScore {
-		return true, nil, cache
+		return true, nil
 	}
 
-	if init {
-		cachedUnvisited := make([]v, len(unvisited))
-		copy(cachedUnvisited, unvisited)
-
-		cachedScores := make(map[v]int)
-		for key, value := range scores {
-			//if value >= score {
-			cachedScores[key] = value
-			//}
-		}
-		cache = append(cache, cacheValue{cachedUnvisited, cachedScores, score})
-	}
-
-	return false, append(unvisited[:i], unvisited[i+1:]...), cache
+	return false, append(unvisited[:i], unvisited[i+1:]...)
 }
 
 func part2() int {
