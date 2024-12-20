@@ -12,7 +12,7 @@ type v struct {
 }
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsByteArray(utils.GetFileName(2024, 20, realData))
 
@@ -50,7 +50,7 @@ func main() {
 	if part == 1 {
 		result = part1(unvisited, bricks, start, end, realData)
 	} else {
-		result = part2()
+		result = part2(unvisited, start, end, realData)
 	}
 
 	fmt.Println(result)
@@ -61,7 +61,6 @@ var (
 )
 
 func part1(way []v, bricks []v, start v, end v, realData bool) int {
-
 	scores := calcInit(way, start, end)
 
 	steps := make([]v, len(scores))
@@ -175,6 +174,67 @@ func calcDijkstra(unvisited []v, scores map[v]int, end v, maxScore int, init boo
 	return false, append(unvisited[:i], unvisited[i+1:]...)
 }
 
-func part2() int {
-	return 0
+func part2(way []v, start v, end v, realData bool) int {
+	scores := calcInit(way, start, end)
+
+	steps := make([]v, len(scores))
+	for i := range len(scores) {
+		for key, value := range scores {
+			if value == i {
+				steps[i] = key
+			}
+		}
+	}
+
+	targetDiff := 100
+	maxCheat := 20
+	if !realData {
+		targetDiff = 74
+		maxCheat = 20
+	}
+
+	result := 0
+	for step := range steps {
+		fmt.Println(step)
+		result += calcWithCheat2(step, targetDiff, maxCheat, scores, steps)
+	}
+
+	return result
+}
+
+func calcWithCheat2(step int, targetDiff int, maxCheat int, scores map[v]int, steps []v) int {
+	p := steps[step]
+
+	result := 0
+
+	// find all surrounding bricks
+	for dx := -maxCheat; dx <= maxCheat; dx++ {
+		for dy := -maxCheat; dy <= maxCheat; dy++ {
+			cheats := abs(dx) + abs(dy)
+			if cheats > maxCheat {
+				continue
+			}
+
+			p2 := v{p.x + dx, p.y + dy}
+
+			stepsTo, found := scores[p2]
+
+			if found {
+				d := stepsTo - step - cheats
+
+				if d >= targetDiff {
+					result++
+				}
+			}
+		}
+	}
+
+	return result
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
