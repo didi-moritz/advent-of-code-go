@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsByteArray(utils.GetFileName(2024, 21, realData))
 
@@ -27,6 +27,12 @@ func main() {
 		}
 	} else {
 		result = part2(data)
+		if realData {
+			if result >= 373249646668954 {
+				// 373249646668954
+				fmt.Println("must be lower than 373249646668954")
+			}
+		}
 	}
 
 	fmt.Println(result)
@@ -42,8 +48,8 @@ func part1(data [][]byte) int {
 	result := 0
 	for _, code := range data {
 		minimum := math.MaxInt
-		for i := 0; i < 10000; i++ {
-			newResult := calcCode(code)
+		for i := 0; i < 100; i++ {
+			newResult := calcCode(code, 2)
 			if newResult < minimum {
 				minimum = newResult
 			}
@@ -67,9 +73,10 @@ var (
 	directionalKeys = make(map[byte]v)
 )
 
-func calcCode(code []byte) int {
+func calcCode(code []byte, directionalRobots int) int {
 	var newCode []byte
 	{
+		var newCode2 []byte
 		currentPos := A
 
 		for _, c := range code {
@@ -79,31 +86,87 @@ func calcCode(code []byte) int {
 			} else {
 				to, _ = strconv.Atoi(string(c))
 			}
-			newCode = append(newCode, calcNumericFromTo(currentPos, to)...)
+			newCode2 = calcNumericFromTo(currentPos, to)
+			newCode = append(newCode, newCode2...)
 			currentPos = to
 		}
 	}
 
-	for i := 0; i < 2; i++ {
+	codeToNewCode := make(map[string][]byte)
+	codeToScore := make(map[string]int)
+
+	score := calcCodeStep(newCode, 0, directionalRobots, codeToNewCode, codeToScore)
+	number, _ := strconv.Atoi(string(code[:len(code)-1]))
+
+	return number * score
+}
+
+func calcCodeStep(code []byte, robot int, directionalRobots int, codeToNewCode map[string][]byte, codeToScore map[string]int) int {
+	if robot == directionalRobots {
+		return len(code)
+	}
+
+	var newCode []byte
+	var found bool
+
+	newCode, found = codeToNewCode[string(code)]
+
+	if !found {
 		var newCode2 []byte
 		{
 			currentPos := byte('A')
+			lastVerticalFirst := true
 
-			for _, to := range newCode {
-				newCode2 = append(newCode2, calcDirectionalFromTo(currentPos, to)...)
+			for _, to := range code {
+				lastVerticalFirst = rand.Intn(2) < 1
+				newCode2, lastVerticalFirst = calcDirectionalFromTo(currentPos, to, lastVerticalFirst)
+				newCode = append(newCode, newCode2...)
 				currentPos = to
 			}
 		}
 
-		newCode = newCode2
+		codeToNewCode[string(code)] = newCode
 	}
 
-	number, _ := strconv.Atoi(string(code[:len(code)-1]))
+	result := 0
 
-	return number * len(newCode)
+	i := 0
+	finished := false
+	for !finished {
+		j := i
+		for ; j < len(newCode) && newCode[j] != 'A'; j++ {
+		}
+
+		if j == len(newCode) {
+			finished = true
+			break
+		}
+
+		newCode3 := newCode[i : j+1]
+		scoreKey := string(newCode3) + strconv.Itoa(robot+1)
+
+		var newScore int
+		var found bool
+
+		newScore, found = codeToScore[scoreKey]
+		if !found {
+			newScore = calcCodeStep(newCode3, robot+1, directionalRobots, codeToNewCode, codeToScore)
+			codeToScore[scoreKey] = newScore
+		}
+
+		result += newScore
+
+		i = j + 1
+
+		if j == len(newCode)-1 {
+			finished = true
+		}
+	}
+
+	return result
 }
 
-func calcDirectionalFromTo(from byte, to byte) []byte {
+func calcDirectionalFromTo(from byte, to byte, lastVerticalFirst bool) ([]byte, bool) {
 	var code []byte
 	fromPos := directionalKeys[from]
 	toPos := directionalKeys[to]
@@ -111,7 +174,7 @@ func calcDirectionalFromTo(from byte, to byte) []byte {
 	fromX := fromPos.x
 	fromY := fromPos.y
 
-	verticalFirst := rand.Intn(2) < 1
+	verticalFirst := lastVerticalFirst
 
 	if (fromPos == v{0, 1}) && fromY != toPos.y {
 		verticalFirst = false
@@ -153,7 +216,7 @@ func calcDirectionalFromTo(from byte, to byte) []byte {
 		}
 	}
 
-	return append(code, 'A')
+	return append(code, 'A'), verticalFirst
 }
 
 func calcNumericFromTo(from int, to int) []byte {
@@ -263,5 +326,41 @@ func colOfNumeric(a int) int {
 }
 
 func part2(data [][]byte) int {
-	return 0
+	directionalKeys[UP] = v{1, 0}
+	directionalKeys[DOWN] = v{1, 1}
+	directionalKeys[LEFT] = v{0, 1}
+	directionalKeys[RIGHT] = v{2, 1}
+	directionalKeys['A'] = v{2, 0}
+
+	result := math.MaxInt
+
+	minimumScores := make([]int, len(data))
+
+	for i := range minimumScores {
+		minimumScores[i] = math.MaxInt
+	}
+
+	for range 50 {
+		for codeNumber, code := range data {
+			for i := 0; i < 1000; i++ {
+				newResult := calcCode(code, 25)
+				if newResult < minimumScores[codeNumber] {
+					minimumScores[codeNumber] = newResult
+				}
+			}
+		}
+
+		sum := 0
+		for _, scores := range minimumScores {
+			sum += scores
+		}
+
+		if sum < result {
+			result = sum
+		}
+
+		fmt.Println(result, sum)
+	}
+
+	return result
 }
