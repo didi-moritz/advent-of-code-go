@@ -29,7 +29,7 @@ func part1(data []string) int {
 		var command string
 		var steps int
 		fmt.Sscanf(line, "%1s%d", &command, &steps)
-		if command == "L" {
+		if command == "R" {
 			pos += steps
 		} else {
 			pos -= steps
