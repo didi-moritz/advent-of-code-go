@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsStringArray(utils.GetFileName(2025, 2, realData))
 
@@ -54,6 +54,54 @@ func part1(data []string) int {
 	return result
 }
 
+func isInvalid2(number string) bool {
+	length := len(number)
+	for i := 1; i <= length/2; i++ {
+		if length%i != 0 {
+			continue
+		}
+
+		word := number[:i]
+
+		success := true
+		for j := i; j < length; j += i {
+			if number[j:j+i] != word {
+				success = false
+				break
+			}
+		}
+
+		if success {
+			return true
+		}
+	}
+
+	return false
+}
+
 func part2(data []string) int {
-	return 0
+	fmt.Println(isInvalid2("446446"))
+	result := 0
+
+	for _, line := range data {
+		words := strings.Split(line, ",")
+
+		for _, word := range words {
+			var start int
+			var end int
+			fmt.Sscanf(word, "%d-%d", &start, &end)
+			fmt.Println(word)
+
+			for n := start; n <= end; n++ {
+				number := strconv.Itoa(n)
+				if isInvalid2(number) {
+					fmt.Println(number)
+					result += n
+				}
+
+			}
+		}
+	}
+
+	return result
 }
