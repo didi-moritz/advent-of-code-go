@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsStringArray(utils.GetFileName(2025, 3, realData))
 
@@ -56,6 +56,31 @@ func part1(data []string) int {
 
 func part2(data []string) int {
 	result := 0
+
+	for _, line := range data {
+		fmt.Println(line)
+
+		number := ""
+
+		pos := 0
+		for i := range 12 {
+			found := false
+			for n := '9'; !found && n != '0'; n-- {
+				digit := string(n)
+				for p := pos; p < len(line)-11+i; p++ {
+					if string(line[p]) == digit {
+						number += digit
+						pos = p + 1
+						found = true
+						break
+					}
+				}
+			}
+		}
+
+		fmt.Println(number)
+		result += int(utils.ParseInt(number))
+	}
 
 	return result
 }
