@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsStringArray(utils.GetFileName(2025, 4, realData))
 
@@ -97,6 +97,45 @@ func part1(data []string) int {
 
 func part2(data []string) int {
 	result := 0
+
+	m := make([][]bool, len(data))
+	r := make([][]bool, len(data))
+	for y, line := range data {
+		m[y] = make([]bool, len(line))
+		r[y] = make([]bool, len(line))
+
+		for x, c := range line {
+			if c == '@' {
+				m[y][x] = true
+			}
+		}
+	}
+
+	for {
+		newResult := 0
+		for y := 0; y < len(m); y++ {
+			for x := 0; x < len(m[y]); x++ {
+				checkAndStore(&r, &m, x, y)
+			}
+		}
+
+		for y := 0; y < len(r); y++ {
+			for x := 0; x < len(r[y]); x++ {
+				if r[y][x] {
+					newResult++
+					m[y][x] = false
+					r[y][x] = false
+				}
+			}
+		}
+
+		if newResult == 0 {
+			break
+		}
+
+		result += newResult
+		fmt.Println(result)
+	}
 
 	return result
 }
