@@ -84,9 +84,9 @@ func part1(data []string) int {
 
 	printMap(&r)
 
-	for y := 0; y < len(r); y++ {
-		for x := 0; x < len(r[y]); x++ {
-			if r[y][x] {
+	for _, line := range r {
+		for _, b := range line {
+			if b {
 				result++
 			}
 		}
