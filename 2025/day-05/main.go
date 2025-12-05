@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsStringArray(utils.GetFileName(2025, 5, realData))
 
@@ -68,5 +68,61 @@ func part1(data []string) int {
 }
 
 func part2(data []string) int {
-	return 0
+	var ranges []Range
+
+	for _, line := range data {
+		if line == "" {
+			break
+		}
+		var from, to int
+		fmt.Sscanf(line, "%d-%d", &from, &to)
+		ranges = append(ranges, Range{from, to})
+
+	}
+
+	result := 0
+
+	for {
+		merged := false
+		for i, r1 := range ranges {
+			for j, r2 := range ranges {
+				if i == j {
+					continue
+				}
+
+				if r1.from >= r2.from && r1.from <= r2.to {
+					if r1.to > r2.to {
+						r2.to = r1.to
+						ranges[j] = r2
+					}
+					merged = true
+				} else if r1.to >= r2.from && r1.to <= r2.to {
+					if r1.from < r2.from {
+						r2.from = r1.from
+						ranges[j] = r2
+					}
+					merged = true
+				}
+
+				if merged {
+					ranges = append(ranges[:i], ranges[i+1:]...)
+					break
+				}
+			}
+
+			if merged {
+				break
+			}
+		}
+
+		if !merged {
+			break
+		}
+	}
+
+	for _, r := range ranges {
+		result += r.to - r.from + 1
+	}
+
+	return result
 }
