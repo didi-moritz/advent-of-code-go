@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsStringArray(utils.GetFileName(2025, 6, realData))
 
@@ -73,6 +73,49 @@ func part1(data []string) int {
 func part2(data []string) int {
 
 	result := 0
+
+	operations := strings.Fields(data[len(data)-1])
+	fmt.Println(operations)
+
+	sum := 0
+	var add bool
+	for i, c := range data[len(data)-1] {
+		if string(c) != " " {
+			result += sum
+
+			fmt.Println("new sum", sum, result)
+
+			add = string(c) == "+"
+
+			if add {
+				sum = 0
+			} else {
+				sum = 1
+			}
+		}
+
+		n := ""
+		for j := range len(data) - 1 {
+			nc := string(data[j][i])
+			if nc != " " {
+				n += nc
+			}
+		}
+
+		if n != "" {
+			nn, _ := strconv.Atoi(n)
+
+			if add {
+				sum += nn
+			} else {
+				sum *= nn
+			}
+			fmt.Println(nn, sum)
+		}
+
+	}
+
+	result += sum
 
 	return result
 }
