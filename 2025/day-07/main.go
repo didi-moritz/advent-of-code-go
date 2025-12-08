@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	part, realData := utils.GetRunConfig(1, false)
+	part, realData := utils.GetRunConfig(2, false)
 
 	data := utils.ReadFileAsStringArray(utils.GetFileName(2025, 7, realData))
 
@@ -52,6 +52,31 @@ func part1(data []string) int {
 func part2(data []string) int {
 
 	result := 0
+
+	ts := make([]int, len(data[0]))
+
+	for i, line := range data {
+		if i == 0 {
+			for j, c := range line {
+				if c == 'S' {
+					ts[j] = 1
+				}
+			}
+			continue
+		}
+
+		for j, c := range line {
+			if c == '^' && ts[j] > 0 {
+				ts[j-1] = ts[j-1] + ts[j]
+				ts[j+1] = ts[j+1] + ts[j]
+				ts[j] = 0
+			}
+		}
+	}
+
+	for _, t := range ts {
+		result += t
+	}
 
 	return result
 }
